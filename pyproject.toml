@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "food-spoilage-poc"
+version = "0.1.0"
+description = "Predict tuna spoilage from IoT gas-sensor data"
+authors = ["Dhinna"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pandas = {extras = ["excel"], version = "^2.2"}
+numpy = "^1.26"
+scikit-learn = "^1.5"
+lightgbm = "^4.3"
+torch = {version="^2.3", extras=["cpu"]}
+pytorch-lightning = "^2.3"
+rich = "^13.7"
+openpyxl = "^3.1"          # read .xlsx
+tqdm = "^4.66"
+typer = "^0.9"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2"
+black = "^24.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
