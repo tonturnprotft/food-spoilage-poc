@@ -89,15 +89,27 @@ def main(dataset: str, model_name: str):
         np.save(out_dir / "img_labels.npy", labels)
         print(f"✓ CNN trained — Test AUC ≈ {float(((labels==1)&(probs>0.5)).mean()):.3f}")
     elif model_name =="fusion":
+        import pandas as pd
         cfg = yaml.safe_load(open("datasets.yml"))[dataset]
         root = pathlib.Path(cfg["path"])
-        img_probs = np.load(root.parent / "models/artifacts" / dataset / "cnn" / "img_probs.npy")
-        img_labels= np.load(root.parent / "models/artifacts" / dataset / "cnn" / "img_labels.npy")
 
-        X_tr, y_tr, X_te, y_te = load_dataset_split(dataset)
-        # align sizes: img arrays correspond to same test sessions as X_te
-        f_model = fusion.train_fusion(X_tr.values, np.zeros(len(X_tr)), y_tr)  # dummy train; refined later
-        f1 = fusion.test_fusion(f_model, X_te.values, img_probs, y_te)
+        # Load per‑photo probabilities produced by CNN
+        cnn_dir = pathlib.Path("models/artifacts") / dataset / "cnn"
+        img_probs = np.load(cnn_dir / "img_probs.npy")
+        idx_df    = pd.read_csv(root / "image_index.csv").iloc[: len(img_probs)]
+        img_df    = idx_df.assign(img_prob=img_probs)
+
+        # Sensor train/test splits
+        X_tr_df, y_tr, X_te_df, y_te = load_dataset_split(dataset)
+        X_tr, img_tr = fusion.prepare_features(X_tr_df, img_df)
+        X_te, img_te = fusion.prepare_features(X_te_df, img_df)
+
+        f_model = fusion.train_fusion(X_tr, img_tr, y_tr)
+        f1 = fusion.test_fusion(f_model, X_te, img_te, y_te)
+
+        out_dir = pathlib.Path("models/artifacts") / dataset / model_name
+        out_dir.mkdir(parents=True, exist_ok=True)
+        json.dump({"fusion_f1": f1}, open(out_dir / "metrics.json", "w"))
         print(f"✓ Fusion F1 = {f1:.3f}")
         
 

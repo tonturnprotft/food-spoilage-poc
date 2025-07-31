@@ -18,3 +18,8 @@ run_iforest:
 	python3 -m src.cli $(DATASET) iforest
 index_images:
 	python3 -m src.pipelines.index_images --dataset=$(DATASET)
+run_cnn:
+	python3 -m src.cli $(DATASET) cnn
+
+run_fusion:
+	python3 -m src.cli $(DATASET) fusion

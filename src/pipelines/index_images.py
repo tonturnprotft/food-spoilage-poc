@@ -34,22 +34,38 @@ def build_index(root: pathlib.Path, cfg: dict) -> pd.DataFrame:
 
     df = pd.DataFrame(rows)
     # convert day index back to actual date by joining on sensor files
+    day_rows = []
+    for p in (root / "sensor").glob("*tuna*.csv"):
+        df_head = pd.read_csv(p, nrows=1)
+        if "day" in df_head.columns:
+            day_rows.append(df_head[["day"]])
+    if not day_rows:
+        raise ValueError("No sensor CSV contained a 'day' column")
     sensor_days = (
-        pd.concat(
-            [pd.read_csv(p, nrows=1)[["day"]] for p in (root / "sensor").glob("*tuna*.csv")]
-        )
+        pd.concat(day_rows)
         .drop_duplicates()
         .sort_values("day")
         .reset_index(drop=True)
         .assign(day_idx=lambda d: d.index + 1)
     )
     df = df.merge(sensor_days, left_on="day", right_on="day_idx").drop(columns="day_idx")
+    # After the merge, we have two `day` columns:
+    #   - `day_x` (integer day index from folder name)
+    #   - `day_y` (actual date string from sensor CSV)
+    # We want the real date string to be our canonical `day`.
+    if "day_x" in df.columns and "day_y" in df.columns:
+        df = (
+            df.rename(columns={"day_x": "day_idx", "day_y": "day"})
+              .drop(columns="day_idx")  # keep the real date string
+        )
     df = df.merge(label_df[["day", "session", "species", "label"]],
                   on=["day", "session"], how="left")
     return df.dropna(subset=["label"]).reset_index(drop=True)
 
 @app.command()
-def main(dataset: str):
+def main(
+    dataset: str = typer.Option(..., "--dataset", help="Dataset key in datasets.yml")
+):
     cfg = yaml.safe_load(open("datasets.yml"))[dataset]
     root = pathlib.Path(cfg["path"])
     out_csv = root / "image_index.csv"
