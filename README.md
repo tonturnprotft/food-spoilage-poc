@@ -107,7 +107,9 @@ MIT — free to use for research & education. Attribution appreciated.
 
 ## 🙏 Acknowledgements
 
-- **Dafif Tuna Spoilage Dataset** – courtesy of the research team.
+- **DaFiF Tuna Spoilage Dataset** – please cite the following when using the data:
+  - Prasetyo *et al.* (2024), *“DaFiF: A Complete Dataset for Fish's Freshness Problems,”* **Data in Brief**.
+  - Prasetyo *et al.* (2024), *“Standardizing the fish freshness class during ice storage using clustering approach,”* **Ecological Informatics**, 80, DOI: [https://doi.org/10.1016/j.ecoinf.2024.102533](https://doi.org/10.1016/j.ecoinf.2024.102533)
 - EfficientNet implementation from **torchvision**.
 - Inspiration from Google’s “Produce Insight” white‑paper.
 
