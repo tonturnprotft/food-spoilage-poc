@@ -10,3 +10,9 @@ run:
 
 clean:
 	rm -rf data/processed models/artifacts
+seq:
+	python3 -m src.pipelines.make_sequences --dataset=$(DATASET)
+calibrate:
+	python3 -m src.pipelines.calibrate_threshold --dataset=$(DATASET) --model=$(MODEL)
+run_iforest:
+	python3 -m src.cli $(DATASET) iforest

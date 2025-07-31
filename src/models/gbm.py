@@ -23,3 +23,19 @@ def train_cv(X, y, n_splits: int = 5):
     # return the model with best fold score just to have one artefact
     best_idx = int(np.argmax(scores))
     return boosters[best_idx], float(np.mean(scores))
+
+# ------------------------------------------------------------------
+# Hold‑out test evaluation
+# ------------------------------------------------------------------
+def evaluate(model, X_test, y_test, thresh: float = 0.5):
+    """
+    Compute F1 on a hold‑out set using the trained LightGBM model.
+    """
+    import numpy as np
+    from sklearn.metrics import f1_score
+    preds = model.predict(X_test)
+    if preds.dtype.kind in {"f","c"}:
+        preds = (preds >= thresh).astype(int)
+    return f1_score(y_test, preds)
+def predict_proba(model, X):
+    return model.predict(X)

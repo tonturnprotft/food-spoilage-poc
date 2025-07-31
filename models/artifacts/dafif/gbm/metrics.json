@@ -1,0 +1,13 @@
+{
+  "cv_f1_mean": 1.0,
+  "test_f1": 1.0,
+  "best_threshold": 0.005,
+  "cost_fn": 10.0,
+  "cost_fp": 1.0,
+  "cost_total": 0.0,
+  "precision_at_tau": 1.0,
+  "recall_at_tau": 1.0,
+  "f1_at_tau": 1.0,
+  "fp_at_tau": 0,
+  "fn_at_tau": 0
+}

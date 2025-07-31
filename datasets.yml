@@ -1,0 +1,13 @@
+dafif:
+  path: data/raw/dafif
+  sensor_glob:  "sensor/*.csv"
+  image_glob:   "images/**/*.jpg"
+  label_file:   "labels/organoleptic_scores.csv"
+
+  species_filter: ["tuna"]      # keep tuna only
+  freshness_map:                # drop score 3
+    1: 0
+    2: 0
+    3: null
+    4: 1
+    5: 1
