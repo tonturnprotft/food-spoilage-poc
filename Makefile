@@ -16,3 +16,5 @@ calibrate:
 	python3 -m src.pipelines.calibrate_threshold --dataset=$(DATASET) --model=$(MODEL)
 run_iforest:
 	python3 -m src.cli $(DATASET) iforest
+index_images:
+	python3 -m src.pipelines.index_images --dataset=$(DATASET)
