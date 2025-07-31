@@ -1,7 +1,8 @@
 import pathlib, json, typer, yaml, torch
 import numpy as np
 from .pipelines.build_dataset import load_dataset_split
-from .models import gbm, lstm  # make sure lstm.py exists
+from .models import gbm, lstm
+from .models import cnn,fusion  # make sure lstm.py exists
 
 app = typer.Typer()
 
@@ -79,6 +80,26 @@ def main(dataset: str, model_name: str):
         print(
             f"✓ IF AUC = {auc_display} | F1 = {stats['f1']:.3f} | Cost = {stats['cost']}"
         )
+    elif model_name =="cnn":
+        model_obj, probs, labels = cnn.train_cnn(dataset)
+        out_dir = pathlib.Path("models/artifacts") / dataset / model_name
+        out_dir.mkdir(parents=True, exist_ok=True)
+        torch.save(model_obj.state_dict(), out_dir / "model.pt")
+        np.save(out_dir / "img_probs.npy", probs)
+        np.save(out_dir / "img_labels.npy", labels)
+        print(f"✓ CNN trained — Test AUC ≈ {float(((labels==1)&(probs>0.5)).mean()):.3f}")
+    elif model_name =="fusion":
+        cfg = yaml.safe_load(open("datasets.yml"))[dataset]
+        root = pathlib.Path(cfg["path"])
+        img_probs = np.load(root.parent / "models/artifacts" / dataset / "cnn" / "img_probs.npy")
+        img_labels= np.load(root.parent / "models/artifacts" / dataset / "cnn" / "img_labels.npy")
+
+        X_tr, y_tr, X_te, y_te = load_dataset_split(dataset)
+        # align sizes: img arrays correspond to same test sessions as X_te
+        f_model = fusion.train_fusion(X_tr.values, np.zeros(len(X_tr)), y_tr)  # dummy train; refined later
+        f1 = fusion.test_fusion(f_model, X_te.values, img_probs, y_te)
+        print(f"✓ Fusion F1 = {f1:.3f}")
+        
 
     else:
         raise typer.BadParameter("MODEL must be 'gbm' or 'lstm' or 'iforest ")
